@@ -1,0 +1,2273 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTA5RP Тренажёр по законке</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #09111f;
+      --bg-soft: rgba(12, 22, 40, 0.88);
+      --panel: rgba(14, 27, 51, 0.92);
+      --panel-border: rgba(137, 180, 255, 0.18);
+      --text: #f1f5ff;
+      --muted: #9fb0d4;
+      --accent: #6ea8ff;
+      --accent-strong: #3f8cff;
+      --accent-soft: rgba(110, 168, 255, 0.16);
+      --success: #5ee0a1;
+      --danger: #ff6b81;
+      --warning: #ffd166;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(68, 128, 255, 0.24), transparent 34%),
+        radial-gradient(circle at top right, rgba(0, 214, 255, 0.18), transparent 24%),
+        linear-gradient(180deg, #081120 0%, #050b16 100%);
+    }
+
+    .app {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.7fr);
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .hero-card,
+    .panel,
+    .toolbar {
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-xl);
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      padding: 28px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--accent);
+      font-size: 0.84rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.02;
+      margin-bottom: 14px;
+    }
+
+    .hero-copy {
+      color: var(--muted);
+      max-width: 900px;
+      line-height: 1.65;
+      font-size: 1rem;
+    }
+
+    .hero-metrics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .metric {
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: var(--bg-soft);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      min-width: 140px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 1.2rem;
+      margin-bottom: 4px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .source-card {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      justify-content: space-between;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .status-badge.pending {
+      color: var(--warning);
+      border-color: rgba(255, 209, 102, 0.24);
+      background: rgba(255, 209, 102, 0.12);
+    }
+
+    .status-badge.ready {
+      color: var(--success);
+      border-color: rgba(94, 224, 161, 0.24);
+      background: rgba(94, 224, 161, 0.12);
+    }
+
+    .status-badge.error {
+      color: var(--danger);
+      border-color: rgba(255, 107, 129, 0.24);
+      background: rgba(255, 107, 129, 0.12);
+    }
+
+    .source-hint {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .source-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) auto auto;
+      gap: 16px;
+      align-items: end;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+
+    .control {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control label {
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .control select,
+    .control input,
+    .upload-button,
+    .action-button,
+    .option-button,
+    .next-button,
+    .chip {
+      font: inherit;
+    }
+
+    .control select,
+    .control input {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(6, 12, 24, 0.75);
+      color: var(--text);
+      border-radius: var(--radius-md);
+      padding: 13px 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .control select:focus,
+    .control input:focus {
+      border-color: rgba(110, 168, 255, 0.5);
+      box-shadow: 0 0 0 4px rgba(110, 168, 255, 0.12);
+    }
+
+    .upload-button,
+    .action-button,
+    .next-button {
+      border: none;
+      outline: none;
+      border-radius: var(--radius-md);
+      padding: 13px 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .action-button,
+    .next-button,
+    .upload-button {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+      color: white;
+    }
+
+    .action-button.secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .action-button:disabled,
+    .next-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+      transform: none;
+    }
+
+    .upload-wrap {
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+    }
+
+    .upload-wrap input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(360px, 0.98fr);
+      gap: 20px;
+    }
+
+    .panel {
+      padding: 22px;
+      min-height: 600px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .panel-copy {
+      color: var(--muted);
+      line-height: 1.55;
+      margin-top: 8px;
+      font-size: 0.95rem;
+    }
+
+    .stats-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .study-search {
+      margin-bottom: 18px;
+    }
+
+    .study-list {
+      display: grid;
+      gap: 14px;
+      max-height: 920px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .section-block {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-lg);
+      background: rgba(9, 18, 34, 0.72);
+      overflow: hidden;
+    }
+
+    .section-block[open] {
+      border-color: rgba(110, 168, 255, 0.18);
+      background: rgba(10, 21, 40, 0.88);
+    }
+
+    .section-block summary {
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 18px;
+      cursor: pointer;
+    }
+
+    .section-block summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .section-heading {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .section-heading strong {
+      font-size: 1rem;
+    }
+
+    .section-heading span,
+    .section-count {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .section-items {
+      display: grid;
+      gap: 12px;
+      padding: 0 18px 18px;
+    }
+
+    .law-card {
+      border-radius: var(--radius-md);
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: grid;
+      gap: 10px;
+    }
+
+    .law-card-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .chip.reference {
+      background: rgba(110, 168, 255, 0.16);
+      border-color: rgba(110, 168, 255, 0.18);
+      color: #d9e7ff;
+    }
+
+    .chip.meta {
+      color: var(--muted);
+    }
+
+    .law-scope,
+    .law-meta {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.93rem;
+    }
+
+    .law-text {
+      line-height: 1.7;
+      font-size: 0.98rem;
+    }
+
+    .law-meta strong {
+      color: var(--text);
+    }
+
+    .quiz-shell {
+      display: grid;
+      gap: 16px;
+      min-height: 520px;
+    }
+
+    .progress-box {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--accent), #8fdcff);
+      border-radius: inherit;
+      transition: width 0.28s ease;
+    }
+
+    .quiz-card,
+    .empty-state,
+    .result-card {
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(8, 15, 28, 0.78);
+    }
+
+    .quiz-card {
+      display: grid;
+      gap: 16px;
+    }
+
+    .quiz-prompt {
+      display: grid;
+      gap: 12px;
+    }
+
+    .quiz-title {
+      font-size: 1.28rem;
+      line-height: 1.35;
+    }
+
+    .quiz-body,
+    .quiz-scope,
+    .answer-feedback,
+    .result-copy,
+    .empty-state p {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option-button {
+      width: 100%;
+      text-align: left;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 40px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .option-button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      border-color: rgba(110, 168, 255, 0.24);
+      background: rgba(110, 168, 255, 0.1);
+    }
+
+    .option-button:disabled {
+      cursor: default;
+    }
+
+    .option-button.correct {
+      border-color: rgba(94, 224, 161, 0.35);
+      background: rgba(94, 224, 161, 0.14);
+    }
+
+    .option-button.incorrect {
+      border-color: rgba(255, 107, 129, 0.35);
+      background: rgba(255, 107, 129, 0.12);
+    }
+
+    .option-label {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      font-weight: 800;
+      text-transform: lowercase;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+
+    .answer-box {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .answer-feedback strong,
+    .result-card strong,
+    .empty-state strong {
+      color: var(--text);
+    }
+
+    .answer-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .result-card {
+      display: grid;
+      gap: 16px;
+    }
+
+    .result-score {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+    }
+
+    .result-breakdown {
+      display: grid;
+      gap: 10px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+    }
+
+    .result-row strong {
+      font-size: 0.95rem;
+    }
+
+    .scenario-shell {
+      display: grid;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .scenario-card,
+    .scenario-pane,
+    .law-reference-item,
+    .check-item {
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(8, 15, 28, 0.78);
+    }
+
+    .scenario-card {
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .scenario-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(110, 168, 255, 0.16);
+      border: 1px solid rgba(110, 168, 255, 0.2);
+      color: #d9e7ff;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .scenario-title {
+      font-size: 1.24rem;
+      line-height: 1.35;
+      margin: 0;
+    }
+
+    .scenario-prompt,
+    .scenario-subcopy,
+    .scenario-pane p,
+    .law-reference-item p,
+    .comparison-copy {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .scenario-input-wrap {
+      display: grid;
+      gap: 8px;
+    }
+
+    .scenario-input-wrap label,
+    .scenario-pane h4,
+    .law-reference-item h4 {
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .scenario-textarea {
+      width: 100%;
+      min-height: 170px;
+      resize: vertical;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(6, 12, 24, 0.78);
+      color: var(--text);
+      padding: 14px 16px;
+      outline: none;
+      font: inherit;
+      line-height: 1.7;
+    }
+
+    .scenario-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .scenario-pane {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .scenario-list,
+    .law-reference-list,
+    .checklist {
+      display: grid;
+      gap: 10px;
+    }
+
+    .scenario-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .law-reference-item {
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .check-item {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px 14px;
+      align-items: start;
+    }
+
+    .check-item.hit {
+      border-color: rgba(94, 224, 161, 0.3);
+      background: rgba(94, 224, 161, 0.12);
+    }
+
+    .check-item.miss {
+      border-color: rgba(255, 107, 129, 0.26);
+      background: rgba(255, 107, 129, 0.1);
+    }
+
+    .check-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 0.9rem;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .comparison-copy {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .empty-state {
+      display: grid;
+      gap: 14px;
+      place-content: center;
+      min-height: 360px;
+    }
+
+    .empty-state h3 {
+      font-size: 1.28rem;
+    }
+
+    .muted-note {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1140px) {
+      .hero,
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 740px) {
+      .app {
+        width: min(100% - 20px, 100%);
+        padding-top: 18px;
+      }
+
+      .hero-card,
+      .panel,
+      .toolbar {
+        border-radius: 20px;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card,
+      .panel {
+        padding: 18px;
+      }
+
+      .option-button {
+        grid-template-columns: 34px minmax(0, 1fr);
+      }
+
+      .option-label {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+      }
+
+      .scenario-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero">
+      <div class="hero-card">
+        <p class="eyebrow">GTA5RP Eclipse • Тренажёр по законке</p>
+        <h1>Интерактивная викторина по законке</h1>
+        <p class="hero-copy">
+          Этот тренажёр читает <code>законка.docx</code>, сам выделяет <strong>Раздел</strong>, <strong>Главу</strong>, <strong>Пункт</strong> и <strong>Статью</strong>,
+          показывает удобную базу для повторения и генерирует викторину с вариантами <strong>a / b / c / d</strong>.
+        </p>
+        <div class="hero-metrics" id="heroMetrics">
+          <div class="metric"><strong>0</strong><span>разделов</span></div>
+          <div class="metric"><strong>0</strong><span>глав</span></div>
+          <div class="metric"><strong>0</strong><span>норм</span></div>
+        </div>
+      </div>
+
+      <div class="hero-card source-card">
+        <div>
+          <div id="loadBadge" class="status-badge pending">Ожидание источника</div>
+          <p id="sourceHint" class="source-hint">
+            Сайт попробует автоматически открыть <code>законка.docx</code>. Если браузер не даст доступ к файлу, просто выбери его вручную.
+          </p>
+        </div>
+        <div class="source-actions">
+          <label class="upload-wrap">
+            <span class="upload-button">Выбрать docx</span>
+            <input id="fileInput" type="file" accept=".docx">
+          </label>
+          <button id="reloadButton" class="action-button secondary" type="button">Перезагрузить источник</button>
+        </div>
+        <p class="muted-note">
+          Формулировки ответов и объяснения всегда показывают точную ссылку вроде <strong>Пункт 1.4.1</strong> или <strong>Статья 4.2</strong>, чтобы тебе было легче запоминать структуру.
+        </p>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="control">
+        <label for="sectionSelect">Раздел</label>
+        <select id="sectionSelect" disabled>
+          <option value="all">Все разделы</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="modeSelect">Режим викторины</label>
+        <select id="modeSelect" disabled>
+          <option value="mixed">Смешанный</option>
+          <option value="reference">Смысл → ссылка</option>
+          <option value="meaning">Ссылка → смысл</option>
+          <option value="punishment">Статья → наказание</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="countSelect">Количество вопросов</label>
+        <select id="countSelect" disabled>
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="studySearch">Поиск по базе</label>
+        <input id="studySearch" type="text" placeholder="Пункт 1.1, Статья 4.2, штраф, устав, прокуратура..." disabled>
+      </div>
+      <button id="startButton" class="action-button" type="button" disabled>Начать викторину</button>
+      <button id="shuffleButton" class="action-button secondary" type="button" disabled>Новый набор</button>
+    </section>
+
+    <section class="dashboard">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Режим изучения</h2>
+            <p class="panel-copy">
+              Ниже ты можешь быстро пролистывать правила, искать по ключевым словам и видеть точную привязку к <strong>Разделу</strong>, <strong>Главе</strong>, <strong>Пункту</strong> и <strong>Статье</strong>.
+            </p>
+          </div>
+          <div id="lawStats" class="stats-pill">Источник не загружен</div>
+        </div>
+        <div id="studyList" class="study-list">
+          <div class="empty-state">
+            <h3>Источник ещё не загружен</h3>
+            <p>Выбери <code>законка.docx</code> или нажми <strong>Перезагрузить источник</strong>, чтобы сайт построил базу и викторину автоматически.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Режим викторины</h2>
+            <p class="panel-copy">
+              Каждый вопрос использует варианты <strong>a / b / c / d</strong>. После ответа ты сразу видишь правильную привязку к конкретному <strong>Пункту</strong> или <strong>Статье</strong>.
+            </p>
+          </div>
+          <div id="poolStats" class="stats-pill">0 доступных норм</div>
+        </div>
+        <div id="quizArea" class="quiz-shell">
+          <div class="empty-state">
+            <h3>Викторина будет доступна после разбора документа</h3>
+            <p>Как только документ будет загружен, ты сможешь выбрать нужный <strong>Раздел</strong>, режим и количество вопросов.</p>
+          </div>
+        </div>
+        <div id="scenarioArea" class="scenario-shell">
+          <div class="empty-state">
+            <h3>Тренажёр ситуаций будет доступен после разбора документа</h3>
+            <p>После загрузки законки здесь появится случайная РП-ситуация, поле для твоего ответа и эталонный разбор с привязкой к нужным нормам.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script>
+    const state = {
+      sections: [],
+      items: [],
+      chaptersCount: 0,
+      quiz: {
+        questions: [],
+        currentIndex: 0,
+        score: 0,
+        completed: false,
+      },
+      scenario: {
+        current: null,
+        userAnswer: "",
+        submitted: false,
+        matches: [],
+        checklistResults: [],
+      },
+    };
+
+    const letters = ["a", "b", "c", "d"];
+
+    const elements = {
+      loadBadge: document.getElementById("loadBadge"),
+      sourceHint: document.getElementById("sourceHint"),
+      fileInput: document.getElementById("fileInput"),
+      reloadButton: document.getElementById("reloadButton"),
+      sectionSelect: document.getElementById("sectionSelect"),
+      modeSelect: document.getElementById("modeSelect"),
+      countSelect: document.getElementById("countSelect"),
+      studySearch: document.getElementById("studySearch"),
+      startButton: document.getElementById("startButton"),
+      shuffleButton: document.getElementById("shuffleButton"),
+      studyList: document.getElementById("studyList"),
+      quizArea: document.getElementById("quizArea"),
+      scenarioArea: document.getElementById("scenarioArea"),
+      lawStats: document.getElementById("lawStats"),
+      poolStats: document.getElementById("poolStats"),
+      heroMetrics: document.getElementById("heroMetrics"),
+    };
+
+    function escapeHtml(value = "") {
+      return String(value).replace(/[&<>"']/g, (symbol) => {
+        const map = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        };
+        return map[symbol];
+      });
+    }
+
+    function cleanText(value = "") {
+      return String(value)
+        .replace(/\u00a0/g, " ")
+        .replace(/\u200b/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function cleanHeading(value = "") {
+      return cleanText(value).replace(/[\s.:;,-]+$/g, "").trim();
+    }
+
+    function shorten(value = "", limit = 190) {
+      const normalized = cleanText(value);
+      if (normalized.length <= limit) {
+        return normalized;
+      }
+      const slice = normalized.slice(0, limit);
+      const cut = Math.max(slice.lastIndexOf(". "), slice.lastIndexOf(", "), slice.lastIndexOf(" "));
+      const safeIndex = cut > 70 ? cut : limit;
+      return `${slice.slice(0, safeIndex).trim()}…`;
+    }
+
+    function shuffle(array) {
+      const copy = [...array];
+      for (let index = copy.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];
+      }
+      return copy;
+    }
+
+    function uniqueBy(array, keyBuilder) {
+      const seen = new Set();
+      const result = [];
+      for (const item of array) {
+        const key = keyBuilder(item);
+        if (seen.has(key)) {
+          continue;
+        }
+        seen.add(key);
+        result.push(item);
+      }
+      return result;
+    }
+
+    function checkpoint(label, ...keywords) {
+      return {
+        label,
+        keywords,
+      };
+    }
+
+    const categoryLibrary = {
+      violence: {
+        searchTerms: ["изби", "телесн", "драка", "побои", "задерж"],
+        steps: [
+          "Сначала обеспечь безопасность на месте и пресеките текущую угрозу, если конфликт ещё продолжается.",
+          "Уточни состояние потерпевшего, при необходимости вызови EMS и зафиксируй видимые повреждения, время и место происшествия.",
+          "Прими заявление, собери приметы нападавших, свидетелей, записи камер, фото и иные доказательства.",
+          "При наличии достаточных оснований организуй ориентировку, задержание и доставление лиц для дальнейшего разбирательства.",
+          "Квалификацию сверяй по релевантной статье или пункту законки и обязательно укажи, на какой именно Пункт или Статью ты опираешься.",
+        ],
+        checklist: [
+          checkpoint("Обеспечил безопасность и оценил угрозу", "безопас", "угроз", "пресек"),
+          checkpoint("Проверил состояние потерпевшего и упомянул EMS", "ems", "мед", "врач", "состоя"),
+          checkpoint("Принял заявление и собрал доказательства", "заявл", "свидетел", "доказ", "каме", "примет"),
+          checkpoint("Указал на задержание или ориентировку при наличии оснований", "задерж", "ориент", "достав", "поиск"),
+        ],
+      },
+      insult: {
+        searchTerms: ["оскорб", "пощеч", "плевок", "жест"],
+        steps: [
+          "Разведи стороны и прекрати дальнейшее нарушение порядка, чтобы конфликт не перешёл в драку.",
+          "Уточни форму оскорбления: слова, неприличный жест, плевок, пощёчина или иное унижение чести и достоинства.",
+          "Прими заявление, опроси свидетелей и закрепи доказательства: аудио, видео, записи камер и показания.",
+          "Сверь обстоятельства с нужной Статьёй законки об оскорблении и, если нарушение систематическое, укажи на риск более строгой квалификации.",
+        ],
+        checklist: [
+          checkpoint("Развёл стороны и прекратил конфликт", "разве", "прекрат", "конфликт"),
+          checkpoint("Зафиксировал конкретную форму оскорбления", "оскорб", "жест", "плев", "пощеч", "унижен"),
+          checkpoint("Собрал заявление, свидетелей и записи", "заявл", "свидетел", "видео", "аудио", "камер"),
+          checkpoint("Связал ситуацию с конкретной Статьёй", "стать", "квалиф", "закон"),
+        ],
+      },
+      medicalObstruction: {
+        searchTerms: ["медицин", "медик", "врач", "помощ", "воспрепятств"],
+        steps: [
+          "Немедленно обеспечь возможность медицинскому работнику выполнять свои обязанности и убери препятствие оказанию помощи.",
+          "Установи лицо, мешающее лечению или осмотру, и зафиксируй конкретные действия, которыми оно препятствовало медработнику.",
+          "Опроси медика, потерпевшего и свидетелей, получи запись камер или бодикамеры, если она есть.",
+          "Дай правовую оценку по Статье о воспрепятствовании законной деятельности медицинского работника, если состав подтверждается.",
+        ],
+        checklist: [
+          checkpoint("Обеспечил работу медиков", "мед", "врач", "помощ", "обеспеч"),
+          checkpoint("Установил, кто именно мешал", "установ", "лицо", "мешал", "препят"),
+          checkpoint("Собрал объяснения и доказательства", "опрос", "свидетел", "видео", "камер", "доказ"),
+          checkpoint("Указал конкретную Статью по воспрепятствованию", "стать", "воспрепят", "квалиф"),
+        ],
+      },
+      appealProcedure: {
+        searchTerms: ["обращен", "должностн", "рассмотрен", "ответ", "заявлен"],
+        steps: [
+          "Проверь, было ли обращение подано надлежащим образом и кто именно отвечал за его рассмотрение.",
+          "Установи сроки, факт регистрации обращения и причину, по которой гражданину или юрлицу не дали ответ вовремя.",
+          "Истребуй документы, входящие номера, переписку и объяснения должностного лица.",
+          "Если подтверждено нарушение порядка рассмотрения обращений, укажи точную Статью и опиши дальнейшее процессуальное оформление.",
+        ],
+        checklist: [
+          checkpoint("Проверил факт подачи и регистрацию обращения", "обращен", "регистра", "входящ", "заявлен"),
+          checkpoint("Установил ответственное должностное лицо", "должност", "ответствен", "кто"),
+          checkpoint("Проверил сроки и документы", "срок", "документ", "переписк", "номер"),
+          checkpoint("Связал ситуацию с конкретной Статьёй", "стать", "квалиф", "порядок"),
+        ],
+      },
+      discrimination: {
+        searchTerms: ["дискриминац", "национал", "религ", "язык", "социальн"],
+        steps: [
+          "Прекрати продолжающееся нарушение и выясни, по какому признаку человеку ограничили права или интересы.",
+          "Закрепи высказывания, переписку, записи или внутренние документы, подтверждающие различное обращение.",
+          "Опроси потерпевшего, свидетелей и должностных лиц, участвовавших в решении или конфликте.",
+          "Дай оценку по Статье о дискриминации и обязательно назови, какая именно Статья и какие признаки в ней указаны.",
+        ],
+        checklist: [
+          checkpoint("Указал дискриминационный признак", "национ", "религ", "язык", "возраст", "социаль"),
+          checkpoint("Собрал доказательства неравного обращения", "доказ", "запис", "переписк", "документ"),
+          checkpoint("Опросил потерпевшего и свидетелей", "опрос", "свидетел", "потерпев"),
+          checkpoint("Сослался на Статью о дискриминации", "дискрим", "стать", "квалиф"),
+        ],
+      },
+      publicMorality: {
+        searchTerms: ["нецензур", "амораль", "контент", "надпис", "символик"],
+        steps: [
+          "Пресеките публичную демонстрацию спорного контента и зафиксируйте, где, когда и каким образом он показывался.",
+          "Установите владельца автомобиля, устройства, экрана или иного носителя, на котором был размещён материал.",
+          "Соберите фото, видео, показания очевидцев и иные материалы, подтверждающие публичный характер демонстрации.",
+          "Сверь обстоятельства с нормой о нецензурных и аморальных материалах и укажи точную Статью, если она подходит по составу.",
+        ],
+        checklist: [
+          checkpoint("Прекратил публичную демонстрацию", "пресек", "убра", "демонстр", "публич"),
+          checkpoint("Установил владельца или источник контента", "владел", "источ", "автомоб", "экран"),
+          checkpoint("Собрал фото, видео и свидетелей", "фото", "видео", "свидетел", "доказ"),
+          checkpoint("Сослался на Статью о нецензурном или аморальном контенте", "неценз", "аморал", "стать"),
+        ],
+      },
+      medInspectionEmployee: {
+        searchTerms: ["медицинск проверк", "не прошел", "отказал", "сотрудник"],
+        steps: [
+          "Проверь, действительно ли сотрудник обязан был пройти медицинскую проверку и был ли он надлежащим образом уведомлён.",
+          "Зафиксируй факт непрохождения либо отказа, время, уведомление и объяснения сотрудника.",
+          "Доложи руководству и оформи материалы так, чтобы можно было применить именно ту норму, которая касается сотрудника государственной организации.",
+          "В ответе укажи точную Статью о непрохождении медицинской проверки сотрудником и вид предусмотренного штрафа.",
+        ],
+        checklist: [
+          checkpoint("Проверил обязанность и уведомление", "обязан", "уведом", "проверк"),
+          checkpoint("Зафиксировал факт отказа или непрохождения", "отказ", "не прош", "фикс"),
+          checkpoint("Доложил руководству и оформил материалы", "долож", "руковод", "оформ"),
+          checkpoint("Назвал конкретную Статью и санкцию", "стать", "штраф", "санкц"),
+        ],
+      },
+      medInspectionOrg: {
+        searchTerms: ["медицинск проверк", "организац", "не прошла", "перенос"],
+        steps: [
+          "Проверь, была ли медицинская проверка согласована и было ли у организации уведомление о дате и времени.",
+          "Зафиксируй факт непрохождения, отказа либо переноса, а также кто именно принял решение со стороны организации.",
+          "Если есть запрос на перенос, отдельно оцени, когда он поступил, потому что это может влиять на размер санкции.",
+          "Укажи точную Статью о непрохождении медицинской проверки организацией и опиши, какой штраф применяется в ситуации.",
+        ],
+        checklist: [
+          checkpoint("Проверил согласование и уведомление", "соглас", "уведом", "проверк"),
+          checkpoint("Зафиксировал отказ, непрохождение или перенос", "отказ", "перенос", "не прош"),
+          checkpoint("Уточнил время запроса на перенос", "время", "минут", "перенос"),
+          checkpoint("Назвал Статью и размер или вид штрафа", "стать", "штраф", "санкц"),
+        ],
+      },
+      prosecutorInspection: {
+        searchTerms: ["прокурорск проверк", "не прошла", "отказ", "госорганизац"],
+        steps: [
+          "Установи, какая именно проверка назначена: плановая или внеплановая, и было ли надлежащее уведомление.",
+          "Зафиксируй отказ в допуске, уклонение или фактическое непрохождение проверки.",
+          "Собери документы, распоряжения, служебные переписки и объяснения ответственных должностных лиц.",
+          "В ответе сошлись на точную Статью о непрохождении прокурорской проверки государственной организацией.",
+        ],
+        checklist: [
+          checkpoint("Уточнил вид проверки и уведомление", "планов", "внеплан", "уведом", "проверк"),
+          checkpoint("Зафиксировал отказ или уклонение", "отказ", "уклон", "не прош"),
+          checkpoint("Собрал распоряжения и объяснения", "документ", "распор", "объясн", "переписк"),
+          checkpoint("Сослался на точную Статью", "прокурор", "стать", "квалиф"),
+        ],
+      },
+      legalActExecution: {
+        searchTerms: ["правовой акт", "суда", "неисполнен", "срок"],
+        steps: [
+          "Уточни, какой именно акт должен быть исполнен: акт правительства или акт суда, а также его срок исполнения.",
+          "Зафиксируй факт неисполнения, дату истечения срока и кто отвечает за исполнение в конкретной структуре.",
+          "Доложи по цепочке подчинения и оформи материалы так, чтобы был виден состав неисполнения и дальнейшие последствия.",
+          "Обязательно укажи точную Статью о неисполнении правового акта правительства или акта суда и примечание о последующем сроке.",
+        ],
+        checklist: [
+          checkpoint("Определил вид акта и срок исполнения", "акт", "суд", "правитель", "срок"),
+          checkpoint("Зафиксировал факт неисполнения", "неисполн", "фикс", "истек"),
+          checkpoint("Указал ответственных и доклад", "ответствен", "долож", "руковод"),
+          checkpoint("Назвал точную Статью и примечание по срокам", "стать", "24 часов", "примечан", "штраф"),
+        ],
+      },
+      breakDiscipline: {
+        searchTerms: ["перерыв", "канале связи", "выйти на службу"],
+        steps: [
+          "Проверь, был ли перерыв оформлен по правилам и внесены ли данные в установленный канал связи.",
+          "Установи длительность отсутствия, служебный статус сотрудника и были ли в это время обстоятельства, исключающие право на перерыв.",
+          "Доложи руководству, зафиксируй нарушение внутреннего порядка и потребуй возвращения к исполнению обязанностей.",
+          "В ответе назови точный Пункт внутреннего устава о перерывах и укажи, что именно было нарушено.",
+        ],
+        checklist: [
+          checkpoint("Проверил оформление перерыва", "перерыв", "оформ", "канал"),
+          checkpoint("Уточнил длительность и статус службы", "длител", "служб", "отсут"),
+          checkpoint("Доложил руководству и зафиксировал нарушение", "долож", "наруш", "руковод"),
+          checkpoint("Назвал точный Пункт устава", "пункт", "устав", "перерыв"),
+        ],
+      },
+      emergencyAssembly: {
+        searchTerms: ["чп", "вп", "общего построения", "выйти на службу"],
+        steps: [
+          "Установи, был ли официальный сигнал ВП, ЧП или общего построения и кто его объявил.",
+          "Проверь, получил ли сотрудник распоряжение и была ли у него объективная причина не выйти на службу.",
+          "Зафиксируй неявку, доложи руководству и оформи материалы по линии внутренней дисциплины.",
+          "В ответе сошлись на конкретный Пункт устава, который обязывает сотрудника выйти на службу при таких обстоятельствах.",
+        ],
+        checklist: [
+          checkpoint("Проверил факт ВП, ЧП или построения", "вп", "чп", "построен", "сигнал"),
+          checkpoint("Установил, было ли распоряжение и причина неявки", "распор", "приказ", "причин", "неяв"),
+          checkpoint("Зафиксировал неявку и доложил руководству", "неяв", "долож", "наруш"),
+          checkpoint("Назвал точный Пункт устава", "пункт", "устав", "службу"),
+        ],
+      },
+    };
+
+    const rawScenarioTemplates = [
+      ["rp-01", "violence", "Избиение у входа в департамент", "К тебе подходит человек и говорит: \"Меня избили у входа в департамент, задержи их\". Твои действия?", ["избили", "потерпев", "свидетел"]],
+      ["rp-02", "violence", "Драка на парковке мэрии", "На парковке мэрии двое граждан дерутся, третий просит немедленно вмешаться. Как ты действуешь поэтапно?", ["драка", "парковк", "мэрии"]],
+      ["rp-03", "violence", "Жалоба на нападение после смены", "Сотрудник после смены заявляет, что на него напали у госздания. Какие действия ты предпринимаешь как силовик?", ["напали", "госздан", "телесн"]],
+      ["rp-04", "violence", "Пострадавший просит срочно найти обидчиков", "Гражданин с видимыми травмами просит немедленно задержать группу, которая его побила. Что ты делаешь сначала и что дальше?", ["травм", "группа", "побила"]],
+      ["rp-05", "violence", "Потасовка у здания суда", "У здания суда начинается массовая потасовка, один из участников уже лежит на земле. Какой правильный алгоритм действий?", ["суда", "массов", "потасовк"]],
+      ["rp-06", "insult", "Плевок в холле департамента", "В холле департамента один гражданин плюнул в другого. Как ты должен оформить ситуацию?", ["плевок", "холле", "унижен"]],
+      ["rp-07", "insult", "Оскорбление сотрудника у стойки", "На ресепшене гражданин громко оскорбляет сотрудника и продолжает конфликт. Как ты действуешь?", ["громко", "сотрудника", "стойк"]],
+      ["rp-08", "insult", "Неприличный жест на улице", "Свидетели утверждают, что человек показал неприличный жест и унижал прохожего. Что ты должен сделать?", ["неприлич", "жест", "прохож"]],
+      ["rp-09", "insult", "Повторное унижение в госздании", "В государственном здании один и тот же гражданин уже не первый раз унижает другого в неприличной форме. Какой порядок действий?", ["не первый раз", "неприличн", "госздан"]],
+      ["rp-10", "insult", "Оскорбление внешности при свидетелях", "Гражданка жалуется, что её унизили из-за внешности в присутствии свидетелей. Твои действия?", ["внешност", "свидетел", "гражданк"]],
+      ["rp-11", "medicalObstruction", "Мешают врачу в приёмном покое", "Медик сообщает, что родственник пациента мешает оказывать помощь и не даёт проводить осмотр. Что ты делаешь?", ["родственник", "осмотр", "приемн"]],
+      ["rp-12", "medicalObstruction", "Блокируют работу EMS на улице", "На месте ДТП человек спорит с врачами и мешает EMS оказывать помощь пострадавшему. Как правильно отыграть действия?", ["дтп", "ems", "мешает"]],
+      ["rp-13", "medicalObstruction", "Не пускают медика к раненому", "Охрана частного объекта не пускает медика к раненому. Какие действия с точки зрения законки ты предпринимаешь?", ["не пускают", "медика", "ранен"]],
+      ["rp-14", "medicalObstruction", "Подозреваемый отталкивает врача", "Подозреваемый отталкивает врача и мешает осмотру задержанного. Твои действия?", ["отталкива", "врача", "задержан"]],
+      ["rp-15", "medicalObstruction", "Блокируют вход в операционную", "Несколько человек перекрыли проход и мешают врачу пройти в операционную. Какой порядок твоих действий?", ["проход", "операцион", "перекрыл"]],
+      ["rp-16", "appealProcedure", "Отказ принять обращение", "Гражданин жалуется, что у него отказались принимать письменное обращение. Что ты проверяешь и как действуешь дальше?", ["письменн", "отказались", "принять"]],
+      ["rp-17", "appealProcedure", "Нет ответа на заявление", "Человек говорит, что на его заявление долго не отвечают в госоргане. Какой у тебя алгоритм действий?", ["не отвечают", "заявлен", "госорган"]],
+      ["rp-18", "appealProcedure", "Потерянное обращение", "Секретарь утверждает, что обращение \"потерялось\", а гражданин требует реакции. Что ты должен установить?", ["потерял", "секретар", "обращен"]],
+      ["rp-19", "appealProcedure", "Игнорирование запроса юрлица", "Представитель юрлица жалуется, что его официальный запрос игнорируют. Какие действия ты предпринимаешь?", ["юрлица", "запрос", "игнор"]],
+      ["rp-20", "appealProcedure", "Повторное обращение без ответа", "Гражданин уже повторно подал обращение, но ответа так и нет. Как ты оформляешь такую ситуацию?", ["повторно", "ответа нет", "подал"]],
+      ["rp-21", "discrimination", "Жалоба на дискриминацию по национальности", "Человек заявляет, что ему отказали и унизили его из-за национальности. Твои действия?", ["национальност", "отказали", "унизили"]],
+      ["rp-22", "discrimination", "Отказ в обслуживании по возрасту", "Сотрудник госучреждения отказывает гражданину, ссылаясь на возраст. Как ты разбираешь этот эпизод?", ["возраст", "госучрежден", "отказывает"]],
+      ["rp-23", "discrimination", "Ущемление по религиозному признаку", "В здании госоргана человека унижают и ограничивают по религиозному признаку. Что ты делаешь?", ["религи", "огранич", "госорган"]],
+      ["rp-24", "discrimination", "Конфликт из-за принадлежности к соцгруппе", "Гражданин считает, что его права нарушили из-за принадлежности к социальной группе. Как ты действуешь?", ["социальн", "права наруш", "гражданин"]],
+      ["rp-25", "discrimination", "Спор из-за языка общения", "Посетитель утверждает, что ему отказали в нормальном отношении из-за языка общения. Какой правильный порядок действий?", ["язык", "посетител", "отношен"]],
+      ["rp-26", "publicMorality", "Матерная наклейка на автомобиле", "У госздания стоит автомобиль с явно нецензурной надписью. Что ты делаешь по закону?", ["автомоб", "надпис", "нецензур"]],
+      ["rp-27", "publicMorality", "Оскорбительный баннер на площади", "На площади вывесили баннер, который унижает группу лиц и нарушает общественную мораль. Твои действия?", ["баннер", "площад", "унижает"]],
+      ["rp-28", "publicMorality", "Аморальный ролик на публичном экране", "На публичном экране крутят аморальный контент. Как ты должен отыграть эту ситуацию?", ["экран", "амораль", "контент"]],
+      ["rp-29", "publicMorality", "Оскорбительная символика у мэрии", "У мэрии стоит машина с оскорбительной символикой. Какие шаги будут правильными?", ["символик", "мэрии", "машина"]],
+      ["rp-30", "publicMorality", "Непристойные плакаты в людном месте", "В людном месте развесили непристойные плакаты. Как ты действуешь и на что ссылаешься?", ["плакаты", "людн", "непристойн"]],
+      ["rp-31", "medInspectionEmployee", "Сотрудник не прошёл медпроверку", "Выясняется, что сотрудник государственной организации не прошёл обязательную медпроверку. Что ты должен проверить и оформить?", ["сотрудник", "не прошел", "обязательн"]],
+      ["rp-32", "medInspectionEmployee", "Отказ сотрудника от медосмотра", "Сотрудник госорганизации прямо отказывается проходить медицинскую проверку. Какой твой порядок действий?", ["отказывается", "медосмотр", "госорганизац"]],
+      ["rp-33", "medInspectionEmployee", "Подчинённый скрывает отсутствие проверки", "Руководителю сообщают, что подчинённый давно не проходил медпроверку и это скрывалось. Как ты разбираешь ситуацию?", ["подчиненн", "скрывал", "давно"]],
+      ["rp-34", "medInspectionOrg", "Организация сорвала медицинскую проверку", "Государственная организация не прошла назначенную медицинскую проверку. Какой у тебя алгоритм действий?", ["организац", "не прошла", "назначен"]],
+      ["rp-35", "medInspectionOrg", "Перенос проверки в последний момент", "Руководство организации просит перенести медицинскую проверку почти в последний момент. Что ты должен учесть?", ["перенести", "последн", "руководств"]],
+      ["rp-36", "medInspectionOrg", "Отказ организации от проверки", "Государственная организация отказывается от прохождения медицинской проверки. Какие действия и какая ссылка на законку?", ["отказывается", "прохождени", "проверки"]],
+      ["rp-37", "prosecutorInspection", "Неявка на прокурорскую проверку", "Госструктура не явилась на прокурорскую проверку. Что ты устанавливаешь и как оформляешь?", ["не явилась", "прокурорск", "госструктур"]],
+      ["rp-38", "prosecutorInspection", "Не допускают проверяющих", "Руководство организации не допускает проверяющих к прокурорской проверке. Твои действия?", ["не допускает", "проверяющ", "руководств"]],
+      ["rp-39", "prosecutorInspection", "Затягивание внеплановой проверки", "Подразделение намеренно затягивает проведение внеплановой прокурорской проверки. Как ты действуешь?", ["внепланов", "затягива", "подразделен"]],
+      ["rp-40", "prosecutorInspection", "Игнор требования прокуратуры", "Государственная организация фактически игнорирует требование о проведении прокурорской проверки. Что делаешь?", ["игнор", "требован", "прокуратур"]],
+      ["rp-41", "legalActExecution", "Не исполнен акт правительства", "Выяснилось, что государственная структура не исполнила правовой акт правительства в срок. Твои действия?", ["акт правительства", "в срок", "структур"]],
+      ["rp-42", "legalActExecution", "Не исполнено решение суда", "Судебный акт вынесен, но государственная организация его не исполняет. Как ты оформляешь ситуацию?", ["судебный акт", "не исполняет", "организац"]],
+      ["rp-43", "legalActExecution", "Пропущен срок исполнения", "Руководство признаёт, что срок исполнения правового акта уже пропущен. Что ты делаешь дальше?", ["срок исполнения", "руководств", "пропущен"]],
+      ["rp-44", "legalActExecution", "Откладывают исполнение акта суда", "Ответственные лица откладывают исполнение акта суда, ссылаясь на занятость. Какой правильный порядок действий?", ["акта суда", "откладыва", "ответствен"]],
+      ["rp-45", "breakDiscipline", "Перерыв без отметки", "Сотрудник ушёл на перерыв, но не оформил его в положенном канале связи. Как ты разбираешь нарушение?", ["перерыв", "канале связи", "не оформил"]],
+      ["rp-46", "breakDiscipline", "Слишком долгий перерыв", "Сотрудник отсутствует дольше допустимого перерыва и не выходит на связь. Какой правильный алгоритм действий?", ["дольше", "отсутствует", "связь"]],
+      ["rp-47", "emergencyAssembly", "Неявка во время ЧП", "Во время ЧП сотрудник не вышел на службу, хотя сигнал был объявлен. Что ты должен проверить и оформить?", ["чп", "не вышел", "сигнал"]],
+      ["rp-48", "emergencyAssembly", "Игнор общего построения", "Шеф собирает общее построение, а сотрудник игнорирует вызов. Как ты действуешь?", ["построени", "шеф", "игнор"]],
+      ["rp-49", "emergencyAssembly", "Неявка на ВП", "Во время ВП сотрудник остаётся вне службы и не реагирует на приказ. Какой порядок твоих действий?", ["вп", "приказ", "вне службы"]],
+      ["rp-50", "emergencyAssembly", "Перерыв во время тревоги", "Сотрудник находился на перерыве и не прекратил его после сигнала тревоги. Что ты должен сделать?", ["перерыве", "тревог", "не прекратил"]],
+    ];
+
+    const scenarioTemplates = rawScenarioTemplates.map(([id, categoryKey, title, prompt, searchTerms]) => {
+      const category = categoryLibrary[categoryKey];
+      return {
+        id,
+        category: categoryKey,
+        title,
+        prompt,
+        steps: [...category.steps],
+        checklist: category.checklist.map((item) => ({
+          label: item.label,
+          keywords: [...item.keywords],
+        })),
+        searchTerms: uniqueBy([...(category.searchTerms || []), ...(searchTerms || [])], (value) => value),
+      };
+    });
+
+    function setStatus(text, tone, hint) {
+      elements.loadBadge.textContent = text;
+      elements.loadBadge.className = `status-badge ${tone}`;
+      elements.sourceHint.innerHTML = hint;
+    }
+
+    function formatSection(sectionId, sectionTitle) {
+      if (!sectionId || sectionId === "0") {
+        return sectionTitle ? `Общий раздел — ${sectionTitle}` : "Общий раздел";
+      }
+      return sectionTitle ? `Раздел ${sectionId} — ${sectionTitle}` : `Раздел ${sectionId}`;
+    }
+
+    function formatChapter(chapterId, chapterTitle) {
+      if (!chapterId || chapterId === "0") {
+        return chapterTitle ? `Глава ${chapterTitle}` : "";
+      }
+      return chapterTitle ? `Глава ${chapterId} — ${chapterTitle}` : `Глава ${chapterId}`;
+    }
+
+    function formatReference(item) {
+      return item.type === "article" ? `Статья ${item.reference}` : `Пункт ${item.reference}`;
+    }
+
+    function formatScope(item) {
+      const parts = [];
+      if (item.sectionId && item.sectionId !== "0") {
+        parts.push(formatSection(item.sectionId, item.sectionTitle));
+      }
+      if (item.chapterId && item.chapterId !== "0") {
+        parts.push(formatChapter(item.chapterId, item.chapterTitle));
+      }
+      return parts.length ? parts.join(" • ") : formatSection(item.sectionId, item.sectionTitle);
+    }
+
+    function normalizeLawText(rawText) {
+      return rawText
+        .replace(/\r/g, "\n")
+        .replace(/\u00a0/g, " ")
+        .replace(/\u200b/g, "")
+        .replace(/[ \t]+/g, " ")
+        .replace(/([A-Za-zА-Яа-я$])(?=(Раздел\s+\d+\.?))/g, "$1\n")
+        .replace(/([A-Za-zА-Яа-я$])(?=(Глава\s+[A-Za-zА-Яа-яIVXLC\d]+\.?))/g, "$1\n")
+        .replace(/([A-Za-zА-Яа-я$])(?=(Статья\s+\d+(?:\.\d+)*\.?))/g, "$1\n")
+        .replace(/([A-Za-zА-Яа-я$])(?=(\d+(?:\.\d+)+\.))/g, "$1\n")
+        .replace(/\s*(Раздел\s+\d+\.?)/g, "\n$1")
+        .replace(/\s*(Глава\s+[A-Za-zА-Яа-яIVXLC\d]+\.?)/g, "\n$1")
+        .replace(/\s*(Статья\s+\d+(?:\.\d+)*\.?)/g, "\n$1")
+        .replace(/(^|[^\d\n])(\d+(?:\.\d+)+\.)\s/g, (_, prefix, point) => `${prefix}\n${point} `)
+        .replace(/\s*(Наказание:)/g, "\n$1")
+        .replace(/\s*(Комментарий:)/g, "\n$1")
+        .replace(/\s*(Примечание:)/g, "\n$1")
+        .replace(/\n{2,}/g, "\n")
+        .trim();
+    }
+
+    function createItem(type, reference, text, section, chapter) {
+      return {
+        type,
+        reference,
+        sectionId: section.id,
+        sectionTitle: section.title,
+        chapterId: chapter.id,
+        chapterTitle: chapter.title,
+        mainText: cleanText(text),
+        detailLines: [],
+      };
+    }
+
+    function finalizeItem(item) {
+      const detailText = item.detailLines.map((line) => cleanText(line)).join(" ");
+      const punishmentLine = item.detailLines.find((line) => /^Наказание:/i.test(line));
+      const notes = item.detailLines.filter((line) => !/^Наказание:/i.test(line)).map((line) => cleanText(line));
+      const summarySource = item.mainText || detailText;
+      const fullText = cleanText([item.mainText, detailText].filter(Boolean).join(" "));
+      return {
+        type: item.type,
+        reference: item.reference.replace(/\.$/, ""),
+        sectionId: item.sectionId,
+        sectionTitle: item.sectionTitle,
+        chapterId: item.chapterId,
+        chapterTitle: item.chapterTitle,
+        summary: shorten(summarySource, 240),
+        fullText,
+        punishment: punishmentLine ? cleanText(punishmentLine.replace(/^Наказание:\s*/i, "")) : "",
+        notes,
+        searchText: cleanText(`${item.reference} ${item.mainText} ${detailText} ${item.sectionTitle} ${item.chapterTitle}`).toLowerCase(),
+      };
+    }
+
+    function ensureSection(sectionMap, id, title) {
+      const normalizedId = id || "0";
+      const existing = sectionMap.get(normalizedId);
+      if (existing) {
+        if (title && (!existing.title || existing.title === "Общий раздел")) {
+          existing.title = title;
+        }
+        return existing;
+      }
+      const section = {
+        id: normalizedId,
+        title: title || (normalizedId === "0" ? "Общий раздел" : ""),
+        chapters: new Map(),
+        items: [],
+      };
+      sectionMap.set(normalizedId, section);
+      return section;
+    }
+
+    function ensureChapter(section, id, title) {
+      const normalizedId = id || "0";
+      const existing = section.chapters.get(normalizedId);
+      if (existing) {
+        if (title && (!existing.title || existing.title === "Общая глава")) {
+          existing.title = title;
+        }
+        return existing;
+      }
+      const chapter = {
+        id: normalizedId,
+        title: title || (normalizedId === "0" ? "Общая глава" : ""),
+        items: [],
+      };
+      section.chapters.set(normalizedId, chapter);
+      return chapter;
+    }
+
+    function parseLawStructure(rawText) {
+      const lines = normalizeLawText(rawText)
+        .split("\n")
+        .map((line) => cleanText(line))
+        .filter(Boolean);
+
+      const sectionMap = new Map();
+      const items = [];
+
+      let currentSection = ensureSection(sectionMap, "0", "Общий раздел");
+      let currentChapter = ensureChapter(currentSection, "0", "Общая глава");
+      let currentItem = null;
+      let lastHeadingType = "";
+
+      const pushCurrentItem = () => {
+        if (!currentItem) {
+          return;
+        }
+        const finalized = finalizeItem(currentItem);
+        if (finalized.summary.length >= 8) {
+          items.push(finalized);
+          currentSection.items.push(finalized);
+          ensureChapter(currentSection, currentChapter.id, currentChapter.title).items.push(finalized);
+        }
+        currentItem = null;
+      };
+
+      for (const line of lines) {
+        if (/^Раздел\s+\d+/i.test(line)) {
+          pushCurrentItem();
+          const match = line.match(/^Раздел\s+(\d+)\.?\s*(.*)$/i);
+          currentSection = ensureSection(sectionMap, match?.[1] || "0", cleanHeading(match?.[2] || ""));
+          currentChapter = ensureChapter(currentSection, "0", "Общая глава");
+          lastHeadingType = "section";
+          continue;
+        }
+
+        if (/^Глава\s+[A-Za-zА-Яа-яIVXLC\d]+/i.test(line)) {
+          pushCurrentItem();
+          const match = line.match(/^Глава\s+([A-Za-zА-Яа-яIVXLC\d]+)\.?\s*(.*)$/i);
+          currentChapter = ensureChapter(currentSection, match?.[1] || "0", cleanHeading(match?.[2] || ""));
+          lastHeadingType = "chapter";
+          continue;
+        }
+
+        if (/^Статья\s+\d+(?:\.\d+)*\.?/i.test(line)) {
+          pushCurrentItem();
+          const match = line.match(/^Статья\s+(\d+(?:\.\d+)*)\.?\s*(.*)$/i);
+          currentItem = createItem("article", match?.[1] || "", match?.[2] || "", currentSection, currentChapter);
+          lastHeadingType = "";
+          continue;
+        }
+
+        if (/^\d+(?:\.\d+)+\./.test(line)) {
+          pushCurrentItem();
+          const match = line.match(/^(\d+(?:\.\d+)+\.)\s*(.*)$/);
+          currentItem = createItem("point", match?.[1] || "", match?.[2] || "", currentSection, currentChapter);
+          lastHeadingType = "";
+          continue;
+        }
+
+        if (/^(Наказание|Комментарий|Примечание):/i.test(line)) {
+          if (currentItem) {
+            currentItem.detailLines.push(line);
+          }
+          continue;
+        }
+
+        if (currentItem) {
+          currentItem.mainText = cleanText(`${currentItem.mainText} ${line}`);
+          continue;
+        }
+
+        if (lastHeadingType === "section") {
+          currentSection.title = cleanHeading(`${currentSection.title} ${line}`);
+          continue;
+        }
+
+        if (lastHeadingType === "chapter") {
+          currentChapter.title = cleanHeading(`${currentChapter.title} ${line}`);
+        }
+      }
+
+      pushCurrentItem();
+
+      const dedupedItems = uniqueBy(items, (item) => `${item.type}|${item.reference}|${item.fullText}`);
+      const sections = [...sectionMap.values()]
+        .map((section) => ({
+          id: section.id,
+          title: section.title,
+          items: dedupedItems.filter((item) => item.sectionId === section.id),
+          chapters: [...section.chapters.values()].filter((chapter) => chapter.items.length > 0 || chapter.id !== "0"),
+        }))
+        .filter((section) => section.items.length > 0);
+
+      const chaptersCount = sections.reduce((total, section) => total + section.chapters.filter((chapter) => chapter.items.length > 0).length, 0);
+
+      return {
+        sections,
+        items: dedupedItems,
+        chaptersCount,
+      };
+    }
+
+    async function extractDocxText(arrayBuffer) {
+      if (!window.JSZip) {
+        throw new Error("JSZip is not available");
+      }
+      const zip = await window.JSZip.loadAsync(arrayBuffer);
+      const documentFile = zip.file("word/document.xml");
+      if (!documentFile) {
+        throw new Error("word/document.xml was not found inside the docx file");
+      }
+      const xml = await documentFile.async("string");
+      const xmlDoc = new DOMParser().parseFromString(xml, "application/xml");
+      const namespace = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+      const paragraphs = [...xmlDoc.getElementsByTagNameNS(namespace, "p")]
+        .map((paragraph) => [...paragraph.getElementsByTagNameNS(namespace, "t")].map((node) => node.textContent || "").join(""))
+        .map((value) => value.replace(/\s+/g, " ").trim())
+        .filter(Boolean);
+      return paragraphs.join("\n");
+    }
+
+    function renderHeroMetrics() {
+      const sectionsCount = state.sections.length;
+      const chaptersCount = state.chaptersCount;
+      const rulesCount = state.items.length;
+      elements.heroMetrics.innerHTML = `
+        <div class="metric"><strong>${sectionsCount}</strong><span>разделов</span></div>
+        <div class="metric"><strong>${chaptersCount}</strong><span>глав</span></div>
+        <div class="metric"><strong>${rulesCount}</strong><span>норм</span></div>
+      `;
+    }
+
+    function populateSectionSelect() {
+      const options = [`<option value="all">Все разделы</option>`];
+      for (const section of state.sections) {
+        const label = `${formatSection(section.id, section.title)} · ${section.items.length} норм`;
+        options.push(`<option value="${escapeHtml(section.id)}">${escapeHtml(label)}</option>`);
+      }
+      elements.sectionSelect.innerHTML = options.join("");
+    }
+
+    function getSelectedSectionPool() {
+      const selectedSection = elements.sectionSelect.value;
+      if (selectedSection === "all") {
+        return state.items;
+      }
+      return state.items.filter((item) => item.sectionId === selectedSection);
+    }
+
+    function getEligiblePool(mode, pool) {
+      if (mode === "punishment") {
+        return pool.filter((item) => item.type === "article" && item.punishment);
+      }
+      return pool;
+    }
+
+    function updatePoolStats() {
+      if (!state.items.length) {
+        elements.poolStats.textContent = "0 доступных норм";
+        return;
+      }
+      const currentPool = getEligiblePool(elements.modeSelect.value, getSelectedSectionPool());
+      const safePool = currentPool.length >= 4 ? currentPool : getEligiblePool(elements.modeSelect.value, state.items);
+      elements.poolStats.textContent = `${safePool.length} доступных норм`;
+    }
+
+    function renderLawStats() {
+      if (!state.items.length) {
+        elements.lawStats.textContent = "Источник не загружен";
+        return;
+      }
+      elements.lawStats.textContent = `${state.sections.length} разделов • ${state.chaptersCount} глав • ${state.items.length} норм`;
+    }
+
+    function renderStudyList() {
+      if (!state.items.length) {
+        elements.studyList.innerHTML = `
+          <div class="empty-state">
+            <h3>Источник ещё не загружен</h3>
+            <p>Выбери <code>законка.docx</code> или нажми <strong>Перезагрузить источник</strong>, чтобы сайт построил базу и викторину автоматически.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const query = cleanText(elements.studySearch.value).toLowerCase();
+
+      const preparedSections = state.sections
+        .map((section) => ({
+          ...section,
+          items: section.items.filter((item) => !query || item.searchText.includes(query) || formatReference(item).toLowerCase().includes(query)),
+        }))
+        .filter((section) => section.items.length > 0);
+
+      if (!preparedSections.length) {
+        elements.studyList.innerHTML = `
+          <div class="empty-state">
+            <h3>Ничего не найдено</h3>
+            <p>Попробуй другой запрос: например, <strong>штраф</strong>, <strong>прокуратура</strong>, <strong>Пункт 1.4.1</strong> или <strong>Статья 4.2</strong>.</p>
+          </div>
+        `;
+        return;
+      }
+
+      elements.studyList.innerHTML = preparedSections
+        .map((section, index) => `
+          <details class="section-block" ${index < 2 ? "open" : ""}>
+            <summary>
+              <div class="section-heading">
+                <strong>${escapeHtml(formatSection(section.id, section.title))}</strong>
+                <span>Открой этот блок, чтобы увидеть точные формулировки и пояснения.</span>
+              </div>
+              <span class="section-count">${section.items.length} норм</span>
+            </summary>
+            <div class="section-items">
+              ${section.items.map((item) => renderLawCard(item)).join("")}
+            </div>
+          </details>
+        `)
+        .join("");
+    }
+
+    function renderLawCard(item) {
+      const notes = item.notes.length
+        ? `<div class="law-meta"><strong>Примечания:</strong> ${escapeHtml(item.notes.join(" "))}</div>`
+        : "";
+      const punishment = item.punishment
+        ? `<div class="law-meta"><strong>Наказание:</strong> ${escapeHtml(item.punishment)}</div>`
+        : "";
+      const chapterLabel = item.chapterId && item.chapterId !== "0" ? `<span class="chip meta">${escapeHtml(formatChapter(item.chapterId, item.chapterTitle))}</span>` : "";
+
+      return `
+        <article class="law-card">
+          <div class="law-card-top">
+            <span class="chip reference">${escapeHtml(formatReference(item))}</span>
+            <span class="chip meta">${escapeHtml(formatSection(item.sectionId, item.sectionTitle))}</span>
+            ${chapterLabel}
+          </div>
+          <div class="law-text">${escapeHtml(item.summary)}</div>
+          <div class="law-scope">Точная привязка: ${escapeHtml(formatScope(item))}</div>
+          ${punishment}
+          ${notes}
+        </article>
+      `;
+    }
+
+    function sampleDistinctValues(values, count, excludedValue = "") {
+      const uniqueValues = uniqueBy(values.filter((value) => value && value !== excludedValue), (value) => value);
+      return shuffle(uniqueValues).slice(0, count);
+    }
+
+    function buildOptionObjects(correctText, distractors) {
+      return shuffle([correctText, ...distractors]).map((text) => ({
+        text,
+        isCorrect: text === correctText,
+      }));
+    }
+
+    function buildReferenceQuestion(target, pool) {
+      const correct = `${formatReference(target)} • ${formatScope(target)}`;
+      const distractors = sampleDistinctValues(
+        pool
+          .filter((item) => item.reference !== target.reference || item.type !== target.type)
+          .map((item) => `${formatReference(item)} • ${formatScope(item)}`),
+        3,
+        correct,
+      );
+      if (distractors.length < 3) {
+        return null;
+      }
+      return {
+        type: "reference",
+        promptTitle: "Какая ссылка соответствует этой норме?",
+        promptBody: target.summary,
+        promptScope: formatScope(target),
+        options: buildOptionObjects(correct, distractors),
+        explanation: `Правильный ответ: ${formatReference(target)}. ${formatScope(target)}. Смысл: ${target.summary}`,
+      };
+    }
+
+    function buildMeaningQuestion(target, pool) {
+      const correct = target.summary;
+      const distractors = sampleDistinctValues(
+        pool
+          .filter((item) => item.reference !== target.reference || item.type !== target.type)
+          .map((item) => item.summary),
+        3,
+        correct,
+      );
+      if (distractors.length < 3) {
+        return null;
+      }
+      return {
+        type: "meaning",
+        promptTitle: `Что регулирует ${formatReference(target)}?`,
+        promptBody: "Выбери смысл, который относится именно к этой ссылке.",
+        promptScope: formatScope(target),
+        options: buildOptionObjects(correct, distractors),
+        explanation: `Правильный ответ: ${formatReference(target)}. ${formatScope(target)}. Смысл: ${target.summary}`,
+      };
+    }
+
+    function buildPunishmentQuestion(target, pool) {
+      if (!target.punishment) {
+        return null;
+      }
+      const correct = target.punishment;
+      const distractors = sampleDistinctValues(
+        pool
+          .filter((item) => item.reference !== target.reference && item.punishment)
+          .map((item) => item.punishment),
+        3,
+        correct,
+      );
+      if (distractors.length < 3) {
+        return null;
+      }
+      return {
+        type: "punishment",
+        promptTitle: `Какое наказание предусмотрено ${formatReference(target)}?`,
+        promptBody: target.summary,
+        promptScope: formatScope(target),
+        options: buildOptionObjects(correct, distractors),
+        explanation: `Правильный ответ для ${formatReference(target)}: ${target.punishment}. ${formatScope(target)}. Смысл: ${target.summary}`,
+      };
+    }
+
+    function chooseQuestionBuilder(mode, target, pool) {
+      if (mode === "reference") {
+        return buildReferenceQuestion(target, pool);
+      }
+      if (mode === "meaning") {
+        return buildMeaningQuestion(target, pool);
+      }
+      if (mode === "punishment") {
+        return buildPunishmentQuestion(target, pool);
+      }
+
+      const builders = [
+        () => buildReferenceQuestion(target, pool),
+        () => buildMeaningQuestion(target, pool),
+      ];
+      if (target.type === "article" && target.punishment) {
+        builders.push(() => buildPunishmentQuestion(target, pool));
+      }
+      for (const builder of shuffle(builders)) {
+        const question = builder();
+        if (question) {
+          return question;
+        }
+      }
+      return null;
+    }
+
+    function createQuizQuestions() {
+      const selectedSectionPool = getSelectedSectionPool();
+      const requestedMode = elements.modeSelect.value;
+      const selectedEligible = getEligiblePool(requestedMode, selectedSectionPool);
+      const globalEligible = getEligiblePool(requestedMode, state.items);
+      const targetPool = selectedEligible.length >= 4 ? selectedEligible : globalEligible;
+      const count = Math.min(Number(elements.countSelect.value), targetPool.length);
+
+      const questions = [];
+      for (const item of shuffle(targetPool)) {
+        const question = chooseQuestionBuilder(requestedMode, item, targetPool);
+        if (question) {
+          questions.push({
+            ...question,
+            selectedIndex: null,
+          });
+        }
+        if (questions.length >= count) {
+          break;
+        }
+      }
+
+      return questions;
+    }
+
+    function resetQuizView() {
+      state.quiz = {
+        questions: [],
+        currentIndex: 0,
+        score: 0,
+        completed: false,
+      };
+      renderQuiz();
+    }
+
+    function startQuiz() {
+      const questions = createQuizQuestions();
+      state.quiz = {
+        questions,
+        currentIndex: 0,
+        score: 0,
+        completed: questions.length === 0,
+      };
+      renderQuiz();
+    }
+
+    function answerQuestion(optionIndex) {
+      const question = state.quiz.questions[state.quiz.currentIndex];
+      if (!question || question.selectedIndex !== null) {
+        return;
+      }
+      question.selectedIndex = optionIndex;
+      if (question.options[optionIndex]?.isCorrect) {
+        state.quiz.score += 1;
+      }
+      renderQuiz();
+    }
+
+    function nextQuestion() {
+      if (state.quiz.currentIndex >= state.quiz.questions.length - 1) {
+        state.quiz.completed = true;
+      } else {
+        state.quiz.currentIndex += 1;
+      }
+      renderQuiz();
+    }
+
+    function renderQuiz() {
+      if (!state.items.length) {
+        elements.quizArea.innerHTML = `
+          <div class="empty-state">
+            <h3>Викторина будет доступна после разбора документа</h3>
+            <p>Как только документ будет загружен, ты сможешь выбрать нужный <strong>Раздел</strong>, режим и количество вопросов.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (!state.quiz.questions.length) {
+        elements.quizArea.innerHTML = `
+          <div class="empty-state">
+            <h3>Собери первый набор</h3>
+            <p>Выбери <strong>Раздел</strong>, режим и количество вопросов, затем нажми <strong>Начать викторину</strong>.</p>
+            <p class="muted-note">Если в выбранном разделе слишком мало материалов для режима <strong>Статья → наказание</strong>, сайт автоматически возьмёт более широкий пул норм.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (state.quiz.completed) {
+        const total = state.quiz.questions.length;
+        const percentage = total ? Math.round((state.quiz.score / total) * 100) : 0;
+        const correctCount = state.quiz.score;
+        const wrongCount = total - correctCount;
+
+        elements.quizArea.innerHTML = `
+          <div class="result-card">
+            <div>
+              <p class="eyebrow">Сессия завершена</p>
+              <h3>Результат викторины</h3>
+              <p class="result-copy">Разбор готов. Ты можешь собрать новый набор или повторить тот же раздел ещё раз.</p>
+            </div>
+            <div class="result-score">${percentage}%</div>
+            <div class="result-breakdown">
+              <div class="result-row"><strong>Правильных ответов</strong><span>${correctCount}</span></div>
+              <div class="result-row"><strong>Ошибок</strong><span>${wrongCount}</span></div>
+              <div class="result-row"><strong>Всего вопросов</strong><span>${total}</span></div>
+            </div>
+            <div class="answer-actions">
+              <button class="next-button" type="button" onclick="startQuiz()">Начать новый набор</button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const question = state.quiz.questions[state.quiz.currentIndex];
+      const progressPercent = ((state.quiz.currentIndex) / state.quiz.questions.length) * 100;
+      const answered = question.selectedIndex !== null;
+
+      elements.quizArea.innerHTML = `
+        <div class="progress-box">
+          <div class="progress-top">
+            <span>Вопрос ${state.quiz.currentIndex + 1} из ${state.quiz.questions.length}</span>
+            <span>Счёт: ${state.quiz.score}</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: ${progressPercent}%"></div>
+          </div>
+        </div>
+        <div class="quiz-card">
+          <div class="quiz-prompt">
+            <h3 class="quiz-title">${escapeHtml(question.promptTitle)}</h3>
+            <div class="quiz-body">${escapeHtml(question.promptBody)}</div>
+            <div class="quiz-scope">Привязка: ${escapeHtml(question.promptScope)}</div>
+          </div>
+          <div class="options">
+            ${question.options.map((option, index) => renderOption(option, index, question.selectedIndex)).join("")}
+          </div>
+          ${answered ? renderAnswerBox(question) : ""}
+        </div>
+      `;
+    }
+
+    function renderOption(option, index, selectedIndex) {
+      const answered = selectedIndex !== null;
+      const statusClass = answered
+        ? option.isCorrect
+          ? "correct"
+          : index === selectedIndex
+            ? "incorrect"
+            : ""
+        : "";
+      const disabled = answered ? "disabled" : "";
+
+      return `
+        <button class="option-button ${statusClass}" type="button" ${disabled} onclick="answerQuestion(${index})">
+          <span class="option-label">${letters[index]}</span>
+          <span>${escapeHtml(option.text)}</span>
+        </button>
+      `;
+    }
+
+    function renderAnswerBox(question) {
+      const selectedOption = question.options[question.selectedIndex];
+      const isCorrect = Boolean(selectedOption?.isCorrect);
+      const resultTitle = isCorrect ? "Верно" : "Неверно";
+      const nextLabel = state.quiz.currentIndex >= state.quiz.questions.length - 1 ? "Показать результат" : "Следующий вопрос";
+
+      return `
+        <div class="answer-box">
+          <div class="answer-feedback"><strong>${escapeHtml(resultTitle)}.</strong> ${escapeHtml(question.explanation)}</div>
+          <div class="answer-actions">
+            <button class="next-button" type="button" onclick="nextQuestion()">${escapeHtml(nextLabel)}</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function findRelevantLawItems(searchTerms = [], limit = 4) {
+      const normalizedTerms = uniqueBy(
+        searchTerms.map((term) => cleanText(term).toLowerCase()).filter(Boolean),
+        (value) => value,
+      );
+
+      return state.items
+        .map((item) => {
+          let score = 0;
+          for (const term of normalizedTerms) {
+            if (item.searchText.includes(term)) {
+              score += term.length >= 7 ? 3 : 2;
+            }
+            if (formatReference(item).toLowerCase().includes(term)) {
+              score += 4;
+            }
+            if (item.punishment && item.punishment.toLowerCase().includes(term)) {
+              score += 1;
+            }
+          }
+          return {
+            item,
+            score,
+          };
+        })
+        .filter((entry) => entry.score > 0)
+        .sort((left, right) => right.score - left.score || (left.item.type === "article" ? -1 : 1))
+        .slice(0, limit)
+        .map((entry) => entry.item);
+    }
+
+    function getRandomScenario() {
+      const pool = scenarioTemplates.filter((template) => template.id !== state.scenario.current?.id);
+      const source = pool.length ? pool : scenarioTemplates;
+      return shuffle(source)[0] || null;
+    }
+
+    function startScenario() {
+      const current = getRandomScenario();
+      state.scenario = {
+        current,
+        userAnswer: "",
+        submitted: false,
+        matches: current ? findRelevantLawItems(current.searchTerms, 4) : [],
+        checklistResults: [],
+      };
+      renderScenarioTrainer();
+    }
+
+    function resetScenarioAnswer() {
+      if (!state.scenario.current) {
+        return;
+      }
+      state.scenario.userAnswer = "";
+      state.scenario.submitted = false;
+      state.scenario.checklistResults = [];
+      renderScenarioTrainer();
+    }
+
+    function submitScenarioAnswer() {
+      if (!state.scenario.current) {
+        return;
+      }
+
+      const input = document.getElementById("scenarioAnswerInput");
+      const userAnswer = cleanText(input?.value || state.scenario.userAnswer);
+      if (!userAnswer) {
+        if (input) {
+          input.focus();
+          input.placeholder = "Сначала напиши, как бы ты действовал в этой ситуации.";
+        }
+        return;
+      }
+
+      const normalizedAnswer = userAnswer.toLowerCase();
+      state.scenario.userAnswer = userAnswer;
+      state.scenario.submitted = true;
+      state.scenario.matches = findRelevantLawItems(state.scenario.current.searchTerms, 4);
+      state.scenario.checklistResults = state.scenario.current.checklist.map((entry) => ({
+        label: entry.label,
+        hit: entry.keywords.some((keyword) => normalizedAnswer.includes(keyword)),
+      }));
+      renderScenarioTrainer();
+    }
+
+    function renderScenarioReferences(matches) {
+      if (!matches.length) {
+        return `
+          <div class="law-reference-item">
+            <h4>Точная ссылка не найдена автоматически</h4>
+            <p>Законка всё равно разобрана: попробуй открыть нужный раздел слева и найти норму по ключевым словам из ситуации.</p>
+          </div>
+        `;
+      }
+
+      return matches.map((item) => {
+        const punishment = item.punishment ? `<p><strong>Наказание:</strong> ${escapeHtml(item.punishment)}</p>` : "";
+        return `
+          <div class="law-reference-item">
+            <h4>${escapeHtml(formatReference(item))}</h4>
+            <div class="law-reference-meta">${escapeHtml(formatScope(item))}</div>
+            <p>${escapeHtml(item.summary)}</p>
+            ${punishment}
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderScenarioChecklist(results) {
+      return results.map((entry) => `
+        <div class="check-item ${entry.hit ? "hit" : "miss"}">
+          <div class="check-mark">${entry.hit ? "✓" : "!"}</div>
+          <div>
+            <strong>${escapeHtml(entry.label)}</strong>
+            <div class="scenario-subcopy">${entry.hit ? "В твоём ответе это уже есть." : "Этого пункта не хватило или он был сформулирован слишком размыто."}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderScenarioTrainer() {
+      if (!state.items.length) {
+        elements.scenarioArea.innerHTML = `
+          <div class="empty-state">
+            <h3>Тренажёр ситуаций будет доступен после разбора документа</h3>
+            <p>После загрузки законки здесь появится случайная РП-ситуация, поле для твоего ответа и эталонный разбор с привязкой к нужным нормам.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (!state.scenario.current) {
+        elements.scenarioArea.innerHTML = `
+          <div class="scenario-card">
+            <div>
+              <div class="scenario-badge">РП-ситуации</div>
+              <h3 class="scenario-title">Собери первую ситуацию</h3>
+              <p class="scenario-subcopy">Нажми кнопку ниже: сайт выдаст случайный кейс и потом покажет эталонный разбор по законке.</p>
+            </div>
+            <div class="scenario-actions">
+              <button class="action-button" type="button" onclick="startScenario()">Выдать ситуацию</button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const scenario = state.scenario.current;
+      const checklistResults = state.scenario.submitted ? state.scenario.checklistResults : [];
+      const matchedCount = checklistResults.filter((entry) => entry.hit).length;
+      const comparisonHtml = state.scenario.submitted
+        ? `
+          <div class="scenario-grid">
+            <div class="scenario-pane">
+              <h4>Твой ответ</h4>
+              <div class="comparison-copy">${escapeHtml(state.scenario.userAnswer)}</div>
+            </div>
+            <div class="scenario-pane">
+              <h4>Эталонный порядок действий</h4>
+              <ol class="scenario-list">${scenario.steps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ol>
+            </div>
+          </div>
+          <div class="scenario-grid">
+            <div class="scenario-pane">
+              <h4>Быстрая самопроверка</h4>
+              <p class="scenario-subcopy">Совпало ${matchedCount} из ${scenario.checklist.length} ключевых блоков ответа.</p>
+              <div class="checklist">${renderScenarioChecklist(checklistResults)}</div>
+            </div>
+            <div class="scenario-pane">
+              <h4>Что посмотреть в законке</h4>
+              <div class="law-reference-list">${renderScenarioReferences(state.scenario.matches)}</div>
+            </div>
+          </div>
+        `
+        : `
+          <div class="scenario-pane">
+            <h4>После отправки ты увидишь</h4>
+            <p>Эталонный порядок действий, быструю самопроверку по ключевым пунктам и ссылки на подходящие <strong>Пункты</strong> и <strong>Статьи</strong> из законки.</p>
+          </div>
+        `;
+
+      elements.scenarioArea.innerHTML = `
+        <div class="scenario-card">
+          <div>
+            <div class="scenario-badge">РП-ситуация • ${escapeHtml(scenario.id.toUpperCase())}</div>
+            <h3 class="scenario-title">${escapeHtml(scenario.title)}</h3>
+            <p class="scenario-prompt">${escapeHtml(scenario.prompt)}</p>
+          </div>
+
+          <div class="scenario-input-wrap">
+            <label for="scenarioAnswerInput">Твой ответ</label>
+            <textarea id="scenarioAnswerInput" class="scenario-textarea" placeholder="Опиши свои действия по шагам: безопасность, фиксация, заявление, доказательства, задержание, точная статья или пункт...">${escapeHtml(state.scenario.userAnswer)}</textarea>
+          </div>
+
+          <div class="scenario-actions">
+            <button class="action-button secondary" type="button" onclick="startScenario()">Другая ситуация</button>
+            ${state.scenario.submitted ? '<button class="action-button secondary" type="button" onclick="resetScenarioAnswer()">Написать заново</button>' : ""}
+            <button class="action-button" type="button" onclick="submitScenarioAnswer()">Показать эталонный ответ</button>
+          </div>
+
+          ${comparisonHtml}
+        </div>
+      `;
+    }
+
+    function enableControls() {
+      elements.sectionSelect.disabled = false;
+      elements.modeSelect.disabled = false;
+      elements.countSelect.disabled = false;
+      elements.studySearch.disabled = false;
+      elements.startButton.disabled = false;
+      elements.shuffleButton.disabled = false;
+    }
+
+    async function loadFromArrayBuffer(arrayBuffer, sourceLabel) {
+      try {
+        setStatus("Разбор источника", "pending", "Подожди пару секунд: сайт читает <code>.docx</code>, выделяет структуру и подготавливает викторину.");
+        const rawText = await extractDocxText(arrayBuffer);
+        const parsed = parseLawStructure(rawText);
+
+        state.sections = parsed.sections;
+        state.items = parsed.items;
+        state.chaptersCount = parsed.chaptersCount;
+
+        if (!state.items.length) {
+          throw new Error("Из документа не удалось извлечь нормы");
+        }
+
+        populateSectionSelect();
+        renderHeroMetrics();
+        renderLawStats();
+        renderStudyList();
+        updatePoolStats();
+        resetQuizView();
+        startScenario();
+        enableControls();
+
+        setStatus(
+          "Источник загружен",
+          "ready",
+          `Законка загружена из <strong>${escapeHtml(sourceLabel)}</strong>. Теперь можно фильтровать правила по <strong>Разделу</strong> и запускать викторину.`
+        );
+      } catch (error) {
+        console.error(error);
+        setStatus(
+          "Ошибка загрузки",
+          "error",
+          `Не удалось разобрать документ. Выбери <code>законка.docx</code> вручную ещё раз. Причина: <strong>${escapeHtml(error.message || "неизвестная ошибка")}</strong>.`
+        );
+      }
+    }
+
+    async function tryAutoLoad() {
+      setStatus("Попытка автозагрузки", "pending", "Сайт пытается открыть <code>законка.docx</code> автоматически. Если не получится, просто загрузи файл вручную кнопкой выше.");
+      try {
+        const response = await fetch(`./${encodeURIComponent("законка.docx")}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const buffer = await response.arrayBuffer();
+        await loadFromArrayBuffer(buffer, "законка.docx");
+      } catch (error) {
+        setStatus(
+          "Нужно выбрать файл вручную",
+          "pending",
+          "Автозагрузка не сработала. Это нормально, если страница открыта напрямую из файла. Нажми <strong>Выбрать docx</strong> и выбери <code>законка.docx</code> вручную."
+        );
+      }
+    }
+
+    elements.fileInput.addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) {
+        return;
+      }
+      const buffer = await file.arrayBuffer();
+      await loadFromArrayBuffer(buffer, file.name);
+      elements.fileInput.value = "";
+    });
+
+    elements.reloadButton.addEventListener("click", () => {
+      tryAutoLoad();
+    });
+
+    elements.startButton.addEventListener("click", () => {
+      startQuiz();
+    });
+
+    elements.shuffleButton.addEventListener("click", () => {
+      startQuiz();
+    });
+
+    elements.studySearch.addEventListener("input", () => {
+      renderStudyList();
+    });
+
+    elements.sectionSelect.addEventListener("change", () => {
+      updatePoolStats();
+      resetQuizView();
+    });
+
+    elements.modeSelect.addEventListener("change", () => {
+      updatePoolStats();
+      resetQuizView();
+    });
+
+    elements.countSelect.addEventListener("change", () => {
+      resetQuizView();
+    });
+
+    window.answerQuestion = answerQuestion;
+    window.nextQuestion = nextQuestion;
+    window.startQuiz = startQuiz;
+    window.startScenario = startScenario;
+    window.submitScenarioAnswer = submitScenarioAnswer;
+    window.resetScenarioAnswer = resetScenarioAnswer;
+
+    renderHeroMetrics();
+    renderLawStats();
+    renderQuiz();
+    renderScenarioTrainer();
+    tryAutoLoad();
+  </script>
+</body>
+</html>
